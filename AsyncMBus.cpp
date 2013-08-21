@@ -22,7 +22,7 @@ AsyncMBus::AsyncMBus(int rxPin, int txPin, t_onMessageCb onMessageCb, t_onTxCb o
   goIdle();
   
   pinMode(rxPin, INPUT); 
-  digitalWrite(rxPin, LOW); // no internal pull-up
+  digitalWrite(rxPin, HIGH); // internal pull-up on
   pinMode(txPin, OUTPUT); 
   digitalWrite(txPin, TX_OFF); // initial state is shut up
 }
@@ -36,7 +36,7 @@ void AsyncMBus::setup() {
       intr = 1;
       break;
     case 3:
-      intr = 0;
+      intr = 1;
       break;
     default:
       fatal("unsupported RX pin, choose 2 or 3 or change the code");
@@ -106,13 +106,13 @@ bool AsyncMBus::tx(uint64_t msg) {
 
 volatile int lastLevel = -1;
 void AsyncMBus::pinChangeISR() {
-  int level = digitalRead(rxPin);
-  if (level==lastLevel)return;
-  lastLevel=level;
+  int level = 1-digitalRead(rxPin);
 //  if(level)
 //    Serial.println("{hi}");
 //  else
 //    Serial.println("{lo}");
+  if (level==lastLevel)return;
+  lastLevel=level;
     
   switch(level) {
     case HIGH:
